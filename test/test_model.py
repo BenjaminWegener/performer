@@ -75,14 +75,14 @@ def test_performer_freezes_during_inference_time(attn_method):
     assert np.allclose(y1, y2)
 
 
-def test_quadratic_attention_output_is_invariant_to_input_masked_sequence_changes():
+def test_quadratic_performer_is_invariant_to_input_masked_sequence_changes():
     layer = Performer(num_heads=2, key_dim=20, attention_method='quadratic', supports=2)
     query = np.random.uniform(size=(2, 4, 3))
     value = np.random.uniform(size=(2, 5, 3))
     query_mask = np.random.randint(low=0, high=2, size=(2, 4)).astype(bool)
-    value_mask = np.random.randint(low=0, high=2, size=(2, 5)).astype(bool)
-    mask = np.einsum('ab,ad->abd', query_mask, value_mask)
+    key_mask = np.random.randint(low=0, high=2, size=(2, 5)).astype(bool)
+    mask = np.einsum('ab,ad->abd', query_mask, key_mask)
     raw_output = layer(query, value, attention_mask=mask)
-    query[~query_mask] = value[~value_mask] = 1000
+    query[~query_mask] = value[~key_mask] = 1000
     masked_output = layer(query, value, attention_mask=mask)
     assert np.allclose(raw_output[query_mask], masked_output[query_mask])

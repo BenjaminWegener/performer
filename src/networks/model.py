@@ -73,18 +73,18 @@ class Performer(MultiHeadAttention):
         attention_scores = self._masked_softmax(attention_scores, attention_mask)
         attention_scores_dropout = self._dropout_layer(attention_scores, training=training)
         attention_output = einsum(self._combine_equation, attention_scores_dropout, value)
-        return attention_output, attention_scores
+        return attention_output
 
     def linear_attention(self, query, key, value, attention_mask=None, training=None):
-        if attention_mask is not None:
-            raise(NotImplementedError('masked linear attention not implemented'))
         random_features = self._get_random_features(training)
         lifted_query = kernel_feature_creator(query, random_features, True)
         lifted_key = kernel_feature_creator(key, random_features, False)
+        if attention_mask is not None:
+            raise(NotImplementedError)
         kv = einsum(self._dot_product_equation, lifted_key, value)
         qkv = einsum(self._combine_equation, lifted_query, kv)
         normalised_qkv = self._normalise(lifted_key, lifted_query, qkv)
-        return normalised_qkv, None
+        return normalised_qkv
 
     @tf.function
     def _get_random_features(self, train):
@@ -98,3 +98,18 @@ class Performer(MultiHeadAttention):
         D = 1. / (D + 1e-6)
         normalised_qkv = einsum(self._qk1_q_equation, D, qkv)
         return normalised_qkv
+
+    def call(self, query, value, key=None, attention_mask=None, training=None):
+        if not self._built_from_signature:
+            self._build_from_signature(query=query, value=value, key=key)
+        if key is None:
+            key = value
+
+        query = self._query_dense(query)
+        key = self._key_dense(key)
+        value = self._value_dense(value)
+
+        attention_output = self._compute_attention(
+            query, key, value, attention_mask, training)
+        attention_output = self._output_dense(attention_output)
+        return attention_output

@@ -63,7 +63,7 @@ def test_performer_output_is_same_shape_as_query(inputs, attn_method):
     query = tf.random.uniform(shape=q_shape, dtype='float32')
     value = tf.random.uniform(shape=v_shape, dtype='float32')
     key = tf.random.uniform(shape=k_shape, dtype='float32')
-    output_tensor = layer(query, value, key)
+    output_tensor = layer(query, value, key=key)
     assert all(np.array(output_tensor.shape) == q_shape)
 
 

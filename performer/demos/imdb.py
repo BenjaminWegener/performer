@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -42,7 +44,7 @@ class TransformerBlock(layers.Layer):
 
 if __name__ == '__main__':
     vocab_size = 20000  # Only consider the top 20k words
-    maxlen = 200  # Only consider the first 200 words of each movie review
+    maxlen = 400  # Only consider the first 200 words of each movie review
     (x_train, y_train), (x_val, y_val) = keras.datasets.imdb.load_data(num_words=vocab_size)
     print(len(x_train), "Training sequences")
     print(len(x_val), "Validation sequences")
@@ -69,6 +71,10 @@ if __name__ == '__main__':
 
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    logs = "logs/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+    tb_callback = tf.keras.callbacks.TensorBoard(log_dir=logs, profile_batch=5)
     history = model.fit(
-        x_train, y_train, batch_size=32, epochs=2, validation_data=(x_val, y_val)
+        x_train, y_train, batch_size=32, epochs=10,
+        validation_data=(x_val, y_val), callbacks=[tb_callback]
     )

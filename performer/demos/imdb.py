@@ -6,6 +6,7 @@ from tensorflow.keras import layers
 
 from performer.networks.model import Performer
 
+
 class TokenAndPositionEmbedding(layers.Layer):
     def __init__(self, maxlen, vocab_size, embed_dim):
         super(TokenAndPositionEmbedding, self).__init__()

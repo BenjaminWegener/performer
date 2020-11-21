@@ -1,4 +1,4 @@
 env/
-performer/demos/logs
+performer/demos/logs/
 exp.py
 __pycache__

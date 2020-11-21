@@ -54,7 +54,7 @@ if __name__ == '__main__':
     embed_dim = 32  # Embedding size for each token
     num_heads = 2  # Number of attention heads
     ff_dim = 32  # Hidden layer size in feed forward network inside transformer
-    method = 'linear'
+    method = 'quadratic'
     supports = 10
 
     inputs = layers.Input(shape=(maxlen,))
@@ -64,9 +64,9 @@ if __name__ == '__main__':
                                          ff_dim, method, supports)
     x = transformer_block(x)
     x = layers.GlobalAveragePooling1D()(x)
-    x = layers.Dropout(0.1)(x)
+    x = layers.Dropout(0.2)(x)
     x = layers.Dense(20, activation="relu")(x)
-    x = layers.Dropout(0.1)(x)
+    x = layers.Dropout(0.2)(x)
     outputs = layers.Dense(2, activation="softmax")(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs)
